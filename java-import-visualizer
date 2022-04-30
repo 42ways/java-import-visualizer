@@ -56,7 +56,8 @@ def visualise_import_dependencies(args):
             traverse_tree(args, file_infos)
             package_dict = create_package_dict_from_fileinfos(file_infos)
             write_package_dict(output, package_dict)
-            output.write('\n@enduml\n')
+            output.writelines(['\nhide members\n',
+                               '\n@enduml\n'])
         finally:
             output.close()
 
@@ -66,7 +67,7 @@ def write_package_dict(output, package_dict):
         for package_or_class in package_dict.keys():
             write_package_or_class(output, package_dict, package_or_class)
     else:
-        output.write(f'\nclass {package_dict}\n') # TODO: This would probably be an error
+        output.write(f'\nclass {package_dict}\n')  # TODO: This would probably be an error
 
 
 def write_package_or_class(output, package_dict, package_or_class_name):
@@ -78,6 +79,9 @@ def write_package_or_class(output, package_dict, package_or_class_name):
 
 def write_class(output, fileinfo):
     output.write(f'\nclass {fileinfo}\n')
+# TODO: we get errors from PlantUML as soon as we add the dependency arrows
+#    for dep in fileinfo.dependencies:
+#        output.write(f'{fileinfo} -> {dep.removesuffix(".*")}\n')
 
 
 def write_package(output, package_dict, package):
