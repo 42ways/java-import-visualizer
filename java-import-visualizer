@@ -188,7 +188,8 @@ def create_and_write_dependencies(args, output, file_infos):
 
 def main():
     parser = argparse.ArgumentParser(description='Find all Java-Files in a directory tree and create an PlantUML file '
-                                                 'to visualize the import dependencies')
+                                                 'to visualize the package structure and optional the import '
+                                                 'dependencies')
     parser.add_argument('root', default='.', nargs='?',
                         help='root directory of tree traversal (default ".")')
     parser.add_argument('-e', '--exclude', dest='exclude_list', metavar='dir', action='append',
