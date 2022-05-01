@@ -66,7 +66,7 @@ def visualise_import_dependencies(args):
             traverse_tree(args, file_infos)
             write_package_dict(output, create_package_dict_from_fileinfos(file_infos), "")
             if args.dependencies:
-                create_and_write_dependencies(output, file_infos)
+                create_and_write_dependencies(args, output, file_infos)
             output.writelines(['\nhide members\n',
                                '\n@enduml\n'])
         finally:
@@ -168,13 +168,21 @@ def write_dependencies(output, dependencies):
             output.write(f'{normalized_name(dep)} --> {normalized_name(depends_on)}\n')
 
 
-def create_and_write_dependencies(output, file_infos):
+def dependency_in_ignored_list(dependency, ignored_list):
+    for prefix in ignored_list:
+        if dependency.startswith(prefix):
+            return True
+    return False
+
+
+def create_and_write_dependencies(args, output, file_infos):
     package_dependencies = {}
     for fileinfo in file_infos:
         if not fileinfo.package in package_dependencies.keys():
             package_dependencies[fileinfo.package] = set()
         for dep in fileinfo.dependencies:
-            package_dependencies[fileinfo.package].add(package_name(dep))
+            if not dependency_in_ignored_list(dep, args.ignored_dependencies):
+                package_dependencies[fileinfo.package].add(package_name(dep))
     write_dependencies(output, package_dependencies)
 
 
@@ -190,6 +198,9 @@ def main():
                         help='print info only for files matching this pattern (may be specified more than once)')
     parser.add_argument('-d', '--dependencies', dest='dependencies', action='store_true',
                         help='show dependencies (imports) on package level')
+    parser.add_argument('-i', '--ignore-dependencies', dest='ignored_dependencies', metavar='package', action='append',
+                        default=["java", "com.google", "edu", "org", "lombok"],
+                        help='ignore package for dependencies (may be specified more than once)')
     parser.add_argument('-o', '--output', dest='output', default='java-import-dependencies.puml', metavar='filename',
                         help='name of output file (default java-import-dependencies.puml)')
     parser.add_argument('--version', action='version', version='%(prog)s 0.1')
