@@ -137,11 +137,13 @@ def traverse_tree(args, fileinfo):
             for pattern in args.file_patterns:
                 new_filenames.extend(fnmatch.filter(filenames, pattern))
             filenames = list(dict.fromkeys(new_filenames))
+        for exclude in args.exclude_list:
+            if exclude in dir_names:
+                dir_names.remove(exclude)
+            if exclude in filenames:
+                filenames.remove(exclude)
         for file in filenames:
             fileinfo.append(process_java_file(dir_path, file))
-        for ignored_dir in args.ignored_dirs:
-            if ignored_dir in dir_names:
-                dir_names.remove(ignored_dir)
 
 
 def main():
@@ -149,8 +151,8 @@ def main():
                                                  'to visualize the import dependencies')
     parser.add_argument('root', default='.', nargs='?',
                         help='root directory of tree traversal (default ".")')
-    parser.add_argument('-e', '--exclude', dest='ignored_dirs', metavar='dir', action='append',
-                        default=[".git", ".idea", "buildSrc", "test"],
+    parser.add_argument('-e', '--exclude', dest='exclude_list', metavar='dir', action='append',
+                        default=[".git", ".idea", "buildSrc", "test", "module-info.java"],
                         help='exclude directory in traversal (may be specified more than once)')
     parser.add_argument('-p', '--pattern', dest='file_patterns', metavar='pattern', action='append', default=["*.java"],
                         help='print info only for files matching this pattern (may be specified more than once)')
