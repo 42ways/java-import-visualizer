@@ -78,8 +78,8 @@ def write_package_or_class(output, package_dict, name_prefix, package_or_class_n
 
 
 def write_class(output, name_prefix, fileinfo):
-    fill_class_name = name_prefix + "_" + fileinfo.class_name
-    output.write(f'\nclass {fill_class_name} as "{fileinfo.class_name}"\n')
+    prefixed_class_name = name_prefix + "_" + fileinfo.class_name
+    output.write(f'\nclass {prefixed_class_name} as "{fileinfo.class_name}"\n')
 # TODO: we get errors from PlantUML as soon as we add the dependency arrows
 #    for dep in fileinfo.dependencies:
 #        output.write(f'{fileinfo} -> {dep.removesuffix(".*")}\n')
