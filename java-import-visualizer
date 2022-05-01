@@ -42,6 +42,16 @@ class FileInfo:
         return f'{self.package}.{self.class_name}'
 
 
+# TODO: This is way to complicated and redundant with other code in this file
+def normalized_name(prefix_path, name=""):
+    normalized = prefix_path.replace('.', '_')
+    if len(name) > 0:
+        normalized = normalized + "_" + name
+    if not normalized.startswith('_'):
+        normalized = "_" + normalized
+    return normalized
+
+
 def visualise_import_dependencies(args):
     with open(args.output, 'w') as output:
         try:
@@ -56,6 +66,8 @@ def visualise_import_dependencies(args):
             traverse_tree(args, file_infos)
             package_dict = create_package_dict_from_fileinfos(file_infos)
             write_package_dict(output, package_dict, "")
+            if args.dependencies:
+                create_and_write_dependencies(output, file_infos)
             output.writelines(['\nhide members\n',
                                '\n@enduml\n'])
         finally:
@@ -78,15 +90,12 @@ def write_package_or_class(output, package_dict, name_prefix, package_or_class_n
 
 
 def write_class(output, name_prefix, fileinfo):
-    prefixed_class_name = name_prefix + "_" + fileinfo.class_name
+    prefixed_class_name = normalized_name(name_prefix, fileinfo.class_name)
     output.write(f'\nclass {prefixed_class_name} as "{fileinfo.class_name}"\n')
-# TODO: we get errors from PlantUML as soon as we add the dependency arrows
-#    for dep in fileinfo.dependencies:
-#        output.write(f'{fileinfo} -> {dep.removesuffix(".*")}\n')
 
 
 def write_package(output, package_dict, name_prefix, package):
-    full_package_name = name_prefix + "_" + package
+    full_package_name = normalized_name(name_prefix, package)
     output.write(f'\npackage {full_package_name} as "{package}" ')
     output.write('{\n')
     write_package_dict(output, package_dict[package], full_package_name)
@@ -146,6 +155,30 @@ def traverse_tree(args, fileinfo):
             fileinfo.append(process_java_file(dir_path, file))
 
 
+def package_name(dep):
+    last_dot_index = dep.rindex(".")
+    if last_dot_index < 0:
+        return dep
+    else:
+        return dep[:last_dot_index]
+
+
+def write_dependencies(output, dependencies):
+    for dep in dependencies.keys():
+        for depends_on in dependencies[dep]:
+            output.write(f'{normalized_name(dep)} -> {normalized_name(depends_on)}\n')
+
+
+def create_and_write_dependencies(output, file_infos):
+    package_dependencies = {}
+    for fileinfo in file_infos:
+        if not fileinfo.package in package_dependencies.keys():
+            package_dependencies[fileinfo.package] = set()
+        for dep in fileinfo.dependencies:
+            package_dependencies[fileinfo.package].add(package_name(dep))
+    write_dependencies(output, package_dependencies)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Find all Java-Files in a directory tree and create an PlantUML file '
                                                  'to visualize the import dependencies')
@@ -156,6 +189,8 @@ def main():
                         help='exclude directory in traversal (may be specified more than once)')
     parser.add_argument('-p', '--pattern', dest='file_patterns', metavar='pattern', action='append', default=["*.java"],
                         help='print info only for files matching this pattern (may be specified more than once)')
+    parser.add_argument('-d', '--dependencies', dest='dependencies', action='store_true',
+                        help='show dependencies (imports) on package level')
     parser.add_argument('-o', '--output', dest='output', default='java-import-dependencies.puml', metavar='filename',
                         help='name of output file (default java-import-dependencies.puml)')
     parser.add_argument('--version', action='version', version='%(prog)s 0.1')
