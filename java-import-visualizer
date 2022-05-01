@@ -64,8 +64,7 @@ def visualise_import_dependencies(args):
                  ])
             file_infos = []
             traverse_tree(args, file_infos)
-            package_dict = create_package_dict_from_fileinfos(file_infos)
-            write_package_dict(output, package_dict, "")
+            write_package_dict(output, create_package_dict_from_fileinfos(file_infos), "")
             if args.dependencies:
                 create_and_write_dependencies(output, file_infos)
             output.writelines(['\nhide members\n',
