@@ -178,7 +178,7 @@ def dependency_in_ignored_list(dependency, ignored_list):
 def create_and_write_dependencies(args, output, file_infos):
     package_dependencies = {}
     for fileinfo in file_infos:
-        if not fileinfo.package in package_dependencies.keys():
+        if fileinfo.package not in package_dependencies.keys():
             package_dependencies[fileinfo.package] = set()
         for dep in fileinfo.dependencies:
             if not dependency_in_ignored_list(dep, args.ignored_dependencies):
