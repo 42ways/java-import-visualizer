@@ -185,7 +185,7 @@ def main():
                         help='root directory of tree traversal (default ".")')
     parser.add_argument('-e', '--exclude', dest='exclude_list', metavar='dir', action='append',
                         default=[".git", ".idea", "buildSrc", "test", "module-info.java"],
-                        help='exclude directory in traversal (may be specified more than once)')
+                        help='exclude file or directory in traversal (may be specified more than once)')
     parser.add_argument('-p', '--pattern', dest='file_patterns', metavar='pattern', action='append', default=["*.java"],
                         help='print info only for files matching this pattern (may be specified more than once)')
     parser.add_argument('-d', '--dependencies', dest='dependencies', action='store_true',
