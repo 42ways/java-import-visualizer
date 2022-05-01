@@ -165,7 +165,7 @@ def package_name(dep):
 def write_dependencies(output, dependencies):
     for dep in dependencies.keys():
         for depends_on in dependencies[dep]:
-            output.write(f'{normalized_name(dep)} -> {normalized_name(depends_on)}\n')
+            output.write(f'{normalized_name(dep)} --> {normalized_name(depends_on)}\n')
 
 
 def create_and_write_dependencies(output, file_infos):
